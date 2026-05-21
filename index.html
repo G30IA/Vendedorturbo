@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Vendedor Turbo - Gestão Estratégica</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* CONFIGURAÇÃO EXCLUSIVA DE IMPRESSÃO EM A4 */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm 10mm 10mm 10mm;
+            }
+            
+            body {
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+                color: #090d16 !important;
+                font-size: 11px !important;
+            }
+
+            /* Ocultar elementos desnecessários na folha de papel */
+            .no-print, 
+            header, 
+            button, 
+            input,
+            #alerta-copiar {
+                display: none !important;
+            }
+
+            /* Forçar visibilidade dos detalhes dinâmicos no Funil */
+            #detalhe-topo, 
+            #detalhe-meio, 
+            #detalhe-fundo {
+                display: block !important;
+                margin-top: 6px !important;
+                font-size: 10px !important;
+                color: #334155 !important;
+            }
+
+            /* Converter o fundo escuro para claro com contraste legível */
+            .bg-slate-900, 
+            .bg-slate-950, 
+            .bg-slate-800, 
+            .bg-slate-800\/50,
+            .bg-gradient-to-r {
+                background-color: #f8fafc !important;
+                background: #f8fafc !important;
+                color: #0f172a !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+            }
+
+            /* Ajuste de tipografia para impressão */
+            .text-slate-100, 
+            .text-slate-50, 
+            .text-slate-200, 
+            .text-slate-300,
+            .text-slate-400,
+            .text-slate-500 {
+                color: #0f172a !important;
+            }
+
+            .text-orange-500, 
+            .text-orange-400, 
+            .text-amber-500, 
+            .text-amber-400 {
+                color: #ea580c !important; /* Laranja escuro legível em papel */
+            }
+
+            /* Mostrar valores digitados dinamicamente nos spans de impressão */
+            .print-only-val {
+                display: inline-block !important;
+                font-weight: 700;
+                color: #0f172a !important;
+                border-bottom: 1px dashed #64748b;
+                padding: 0 4px;
+            }
+
+            /* Reorganizar grelhas interativas para fluxo linear na folha vertical */
+            .grid {
+                display: grid !important;
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+                gap: 12px !important;
+            }
+
+            .print-grid-duo {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+
+            /* Prevenção de quebra de elementos a meio da folha */
+            section, .grid > div {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-orange-500 selection:text-white">
+
+    <!-- CABEÇALHO (Ocultado na impressão) -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-tr from-orange-600 to-amber-500 rounded-xl shadow-lg shadow-orange-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-bold tracking-widest text-orange-500 uppercase">Método G30</span>
+                    <h1 class="text-xl font-extrabold text-slate-50 tracking-tight">Vendedor Turbo</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Botão de Download / Impressão A4 -->
+                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-orange-500/20 transition-all duration-300 transform hover:-translate-y-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Descarregar em A4 (PDF)
+                </button>
+
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Sessão Ativa: 21 de Maio
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- CABEÇALHO EXCLUSIVO PARA IMPRESSÃO (Ocultado no ecrã) -->
+    <div class="hidden print:block border-b-2 border-slate-300 pb-4 mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <span class="text-xs font-bold tracking-widest text-orange-600 uppercase">Método G30 • Mentoria Automóvel</span>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Plano de Ação Estratégico - Vendedor Turbo</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Resumo consolidado da sessão de mentoria conduzida por Jeferson Gomes.</p>
+            </div>
+            <div class="text-right text-[10px] text-slate-400">
+                Data de Emissão: 21/05/2026
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- RESUMO DE IMPACTO (MÉTRICAS DO JEFERSON GOMES) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition duration-300">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Meta de Vendas</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-3xl font-bold text-slate-50">100%</span>
+                    <span class="text-xs font-semibold text-emerald-400">do Stock Mensal</span>
+                </div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden no-print">
+                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full w-full"></div>
+                </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition duration-300">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Equipa Recomendada</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-3xl font-bold text-slate-50">4</span>
+                    <span class="text-xs font-semibold text-slate-400">Pessoas-Chave</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3 truncate">Triagem, Vídeo, Venda e Lavagem</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition duration-300">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Volume de Visualizações</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-3xl font-bold text-slate-50">1 Milhão</span>
+                    <span class="text-xs font-semibold text-emerald-400">+185% Orgânico</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">Alcançado com conteúdo diário</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition duration-300">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Investimento Recomendado</p>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-3xl font-bold text-slate-50">10 R$</span>
+                    <span class="text-xs font-semibold text-slate-400">por dia em Anúncios</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">Para dominar o mercado local</p>
+            </div>
+        </div>
+
+        <!-- 1. QUADRO DE AÇÃO - AS 7 PERGUNTAS (5W2H TOTALMENTE EM PORTUGUÊS) -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2">
+                        <span class="w-2 h-5 bg-orange-500 rounded-full"></span>
+                        As 7 Perguntas Fundamentais da Ação (Metodologia Estruturada)
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1 no-print">Clique em cada pergunta para consultar a estratégia detalhada da reunião.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-400 no-print">
+                    <span class="px-2.5 py-1 bg-slate-800 rounded-md border border-slate-700">Plano Operacional</span>
+                </div>
+            </div>
+
+            <!-- Grelha de Cartões Interativos (Ocultados na Impressão em papel se preferir focar no conteúdo expandido) -->
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-4 no-print" id="quadro-perguntas">
+                <!-- O QUÊ -->
+                <button onclick="selecionarPergunta('oque')" id="btn-oque" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-800/50 border-orange-500/50 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-orange-400 uppercase tracking-widest block mb-1">1. O quê?</span>
+                    <span class="text-sm font-bold text-slate-100 block">Atendimento Humanizado</span>
+                </button>
+                <!-- PORQUÊ -->
+                <button onclick="selecionarPergunta('porque')" id="btn-porque" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">2. Porquê?</span>
+                    <span class="text-sm font-bold text-slate-200 block">Confiança do Cliente</span>
+                </button>
+                <!-- QUEM -->
+                <button onclick="selecionarPergunta('quem')" id="btn-quem" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">3. Quem?</span>
+                    <span class="text-sm font-bold text-slate-200 block">O Vendedor Autónomo</span>
+                </button>
+                <!-- ONDE -->
+                <button onclick="selecionarPergunta('onde')" id="btn-onde" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">4. Onde?</span>
+                    <span class="text-sm font-bold text-slate-200 block">Redes & Loja</span>
+                </button>
+                <!-- QUANDO -->
+                <button onclick="selecionarPergunta('quando')" id="btn-quando" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">5. Quando?</span>
+                    <span class="text-sm font-bold text-slate-200 block">Imediato (Maio)</span>
+                </button>
+                <!-- COMO -->
+                <button onclick="selecionarPergunta('como')" id="btn-como" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">6. Como?</span>
+                    <span class="text-sm font-bold text-slate-200 block">Funil Triplo</span>
+                </button>
+                <!-- QUANTO CUSTA -->
+                <button onclick="selecionarPergunta('quanto')" id="btn-quanto" class="p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">7. Quanto?</span>
+                    <span class="text-sm font-bold text-slate-200 block">Baixo Custo</span>
+                </button>
+            </div>
+
+            <!-- Painel de Detalhes da Pergunta Selecionada (Ficará visível e estruturado na Impressão) -->
+            <div class="mt-6 p-6 bg-slate-950 border border-slate-800 rounded-xl" id="conteudo-detalhe">
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="space-y-3 flex-1">
+                        <span class="text-xs font-bold text-orange-500 uppercase tracking-widest">Ação Central</span>
+                        <h3 class="text-lg font-bold text-slate-100">Atendimento Focado na Pessoa e no Processo Local</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Mudar radicalmente o foco do produto físico para o ser humano. O processo assenta em criar ligações emocionais genuínas (perguntar pela família, objetivos, rotinas do cliente) antes de apresentar valores ou tabelas técnicas de veículos.
+                        </p>
+                        <div class="pt-2 flex flex-wrap gap-2 no-print">
+                            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-slate-300">Zero Filtro Técnico Inicial</span>
+                            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-slate-300">Conexão Primeiro</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-80 bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <span class="text-xs font-bold text-slate-400 block uppercase tracking-wider">Conselho de Ouro</span>
+                        <p class="text-xs text-slate-300 italic leading-relaxed">
+                            "O cliente escolhe primeiro o vendedor, em segundo lugar a empresa e só em terceiro o produto."
+                        </p>
+                        <div class="h-px bg-slate-800 no-print"></div>
+                        <span class="text-[11px] text-orange-400 block">★ Prioridade: Altíssima</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DIVIDIDA EM DUAS COLUNAS: FUNIL E CALCULADORA -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 print-grid-duo">
+
+            <!-- 2. FUNIL DE ATRAÇÃO DIGITAL -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2 mb-2">
+                        <span class="w-2 h-5 bg-orange-500 rounded-full"></span>
+                        O Funil de Atração de Clientes
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-6">A estrutura que gerou mais de 1 milhão de visualizações com conteúdo orgânico.</p>
+                    
+                    <!-- Desenho Visual do Funil -->
+                    <div class="space-y-3">
+                        <!-- Topo do Funil -->
+                        <div onclick="mostrarInfoFunil('topo')" id="funil-topo" class="cursor-pointer group bg-slate-950 hover:bg-slate-800 border-l-4 border-orange-500 rounded-r-xl p-4 transition duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black bg-orange-500/10 text-orange-400 px-2 py-1 rounded">TOPO</span>
+                                    <h4 class="font-bold text-sm text-slate-200">Vídeos Curtos de Alto Alcance</h4>
+                                </div>
+                                <span class="text-xs text-slate-400 no-print">Atrai Não-Seguidores</span>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-400" id="detalhe-topo">
+                                <p class="mb-2"><strong>Diretriz:</strong> Publique vídeos da vida real sem edições complexas nem textos longos na descrição. Use apenas títulos chamativos na imagem.</p>
+                                <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-300">
+                                    <li>Objetivo: Volume de visualizações e atração.</li>
+                                    <li>Frequência: Diária, focado na naturalidade.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Meio do Funil -->
+                        <div onclick="mostrarInfoFunil('meio')" id="funil-meio" class="cursor-pointer group bg-slate-950 hover:bg-slate-800 border-l-4 border-amber-500 rounded-r-xl p-4 transition duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black bg-amber-500/10 text-amber-400 px-2 py-1 rounded">MEIO</span>
+                                    <h4 class="font-bold text-sm text-slate-200">Histórias Diárias Ativas</h4>
+                                </div>
+                                <span class="text-xs text-slate-400 no-print">Gera Desejo e Diálogo</span>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-400" id="detalhe-meio">
+                                <p class="mb-2"><strong>Diretriz:</strong> Fale com quem já o segue. Mostre a rotina, os bastidores, promoções exclusivas e faça perguntas diretas (conversão em Mensagens Diretas).</p>
+                                <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-300">
+                                    <li>Objetivo: Interação próxima de confiança.</li>
+                                    <li>Estratégia: Oferecer o novo stock em primeira mão.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Fundo do Funil -->
+                        <div onclick="mostrarInfoFunil('fundo')" id="funil-fundo" class="cursor-pointer group bg-slate-950 hover:bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-4 transition duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">BASE</span>
+                                    <h4 class="font-bold text-sm text-slate-200">Vitrine Digital Organizacional</h4>
+                                </div>
+                                <span class="text-xs text-slate-400 no-print">Decisão & Fecho</span>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-400" id="detalhe-fundo">
+                                <p class="mb-2"><strong>Diretriz:</strong> O seu catálogo institucional. É o local onde o cliente interessado pesquisa e avalia a seriedade do seu trabalho antes de comprar.</p>
+                                <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-300">
+                                    <li>Objetivo: Apresentação técnica e credibilidade.</li>
+                                    <li>Provas Sociais: Gravação de depoimentos de entrega.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400 no-print">
+                    💡 <span class="text-slate-300 font-bold">Dica do Especialista:</span> Clique em qualquer etapa do funil acima para desdobrar as orientações práticas de publicação.
+                </div>
+            </section>
+
+            <!-- 3. CALCULADORA DE RETORNO DO VENDEDOR AUTÓNOMO -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2 mb-2">
+                    <span class="w-2 h-5 bg-orange-500 rounded-full"></span>
+                    Simulador Financeiro de Anúncios
+                </h2>
+                <p class="text-xs text-slate-400 mb-6">Calcule o retorno de investir pequenas quantias diárias do seu bolso para atrair contactos próprios.</p>
+
+                <div class="space-y-4">
+                    <!-- Entradas de Dados -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Investimento Diário</label>
+                            <input type="number" id="investimento-diario" value="10" oninput="calcularFinanceiro()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition no-print">
+                            <!-- Visualização estática durante a impressão -->
+                            <span id="print-investimento-diario" class="hidden print-only-val">R$ 10,00</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Comissão Média por Venda</label>
+                            <input type="number" id="comissao-media" value="1000" oninput="calcularFinanceiro()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition no-print">
+                            <span id="print-comissao-media" class="hidden print-only-val">R$ 1.000,00</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Custo Médio por Contacto</label>
+                            <input type="number" id="custo-contato" value="5" oninput="calcularFinanceiro()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition no-print">
+                            <span id="print-custo-contato" class="hidden print-only-val">R$ 5,00</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Taxa de Conversão da Equipa</label>
+                            <input type="number" id="taxa-conversao" value="3" oninput="calcularFinanceiro()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-orange-500 transition no-print">
+                            <span id="print-taxa-conversao" class="hidden print-only-val">3%</span>
+                        </div>
+                    </div>
+
+                    <!-- Divisor -->
+                    <div class="h-px bg-slate-800 my-2 no-print"></div>
+
+                    <!-- Resultados Gerados -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] text-slate-400 block uppercase font-medium">Investimento Mensal</span>
+                            <span class="text-sm font-bold text-slate-100 block mt-1" id="res-investimento">R$ 300,00</span>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] text-slate-400 block uppercase font-medium">Total de Contactos</span>
+                            <span class="text-sm font-bold text-slate-100 block mt-1" id="res-contatos">60</span>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] text-slate-400 block uppercase font-medium">Vendas Estimadas</span>
+                            <span class="text-sm font-bold text-slate-100 block mt-1" id="res-vendas">1.8</span>
+                        </div>
+                    </div>
+
+                    <!-- Lucro Líquido Estimado -->
+                    <div class="bg-gradient-to-r from-emerald-950 to-slate-950 p-4 rounded-xl border border-emerald-500/20 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">Retorno Líquido Estimado</span>
+                            <p class="text-[11px] text-slate-400">Já deduzindo o valor total investido nas campanhas.</p>
+                        </div>
+                        <span class="text-xl font-black text-emerald-400" id="res-lucro">R$ 1.500,00</span>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 4. SIMULADOR DE GUIÕES - O PULO DO GATO DOS ANIVERSARIANTES -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2">
+                    <span class="w-2 h-5 bg-orange-500 rounded-full"></span>
+                    Simulador de Guiões: Ações com Aniversariantes
+                </h2>
+                <p class="text-sm text-slate-400 mt-1">Gere ligações de alto impacto emocional e capture de 2 a 3 indicações quentes e qualificadas de forma natural.</p>
+            </div>
+
+            <!-- Seleção de Fase do Guião (Ocultado no papel de forma direta) -->
+            <div class="flex flex-wrap gap-2 mb-4 no-print">
+                <button onclick="selecionarGuiao(1)" id="btn-g1" class="px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-orange-600 text-white shadow-lg shadow-orange-500/20">
+                    Fase 1: O Telefonema Surpresa
+                </button>
+                <button onclick="selecionarGuiao(2)" id="btn-g2" class="px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-slate-950 text-slate-400 border border-slate-800 hover:bg-slate-800">
+                    Fase 2: Entrega do Brinde
+                </button>
+                <button onclick="selecionarGuiao(3)" id="btn-g3" class="px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-slate-950 text-slate-400 border border-slate-800 hover:bg-slate-800">
+                    Fase 3: O Pedido de Indicações
+                </button>
+                <button onclick="selecionarGuiao(4)" id="btn-g4" class="px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-slate-950 text-slate-400 border border-slate-800 hover:bg-slate-800">
+                    Fase 4: Ligação para a Indicação
+                </button>
+            </div>
+
+            <!-- Janela do Guião -->
+            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 relative">
+                <!-- Botão de Copiar Texto (Ocultado na Impressão) -->
+                <button onclick="copiarTextoGuiao()" class="absolute top-4 right-4 text-xs font-semibold px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 hover:text-slate-100 flex items-center gap-1.5 transition no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Copiar Guião
+                </button>
+
+                <div class="space-y-4 max-w-3xl" id="caixa-guiao">
+                    <!-- Conteúdo Dinâmico -->
+                    <div>
+                        <span class="px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold rounded uppercase">Fase 1: Ligação de Felicitações</span>
+                        <h4 class="text-base font-bold text-slate-100 mt-2">Objetivo: Gerar surpresa, gratidão e resgatar a marca na mente do cliente sem tentar vender nada.</h4>
+                    </div>
+                    <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-800 text-sm leading-relaxed text-slate-300 italic" id="texto-para-copiar">
+                        "Olá, [Nome do Cliente], muito bom dia! Daqui fala o [Seu Nome], da [Nome da Loja]. Liguei apenas porque o nosso sistema me alertou que hoje é o seu aniversário! Queria desejar-lhe os meus mais sinceros parabéns em nome de toda a equipa. Que tenha um dia muito feliz! Temos aqui na loja uma pequena lembrança guardada com o seu nome para celebrar este dia. Quando passar por estes lados, venha tomar um café comigo para podermos entregar-lhe o seu presente. Um abraço forte e divirta-se muito hoje!"
+                    </div>
+                    <p class="text-xs text-slate-500"><strong>Dica:</strong> Faça isto por chamada de voz real. Praticamente ninguém faz ligações hoje em dia; esta atitude destaca a sua marca imediatamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. LISTA DE TAREFAS DE IMPLEMENTAÇÃO DA METODOLOGIA -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2">
+                        <span class="w-2 h-5 bg-orange-500 rounded-full"></span>
+                        Lista de Implementação Prática
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1">Ações necessárias para assegurar o funcionamento da metodologia e avaliar o desempenho da equipa.</p>
+                </div>
+                <!-- Progresso Dinâmico -->
+                <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 flex items-center gap-3 no-print">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block uppercase">Progresso Geral</span>
+                        <span class="text-sm font-bold text-orange-400" id="texto-progresso">0% Concluído</span>
+                    </div>
+                    <div class="w-20 bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="barra-progresso" class="bg-orange-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grelha de Tarefas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Linha 1 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-1" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-1" class="text-sm font-bold text-slate-200 cursor-pointer">Verificar Aniversariantes do Dia</label>
+                        <p class="text-xs text-slate-400 mt-1">Aceder ao sistema de gestão de clientes diariamente, retirar a lista de aniversariantes e realizar chamadas de felicitações logo pela manhã.</p>
+                    </div>
+                </div>
+                <!-- Linha 2 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-2" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-2" class="text-sm font-bold text-slate-200 cursor-pointer">Providenciar Lembranças Personalizadas</label>
+                        <p class="text-xs text-slate-400 mt-1">Preparar presentes simples (canecas, bonés ou pequenos brindes úteis com cartão de aniversário escrito à mão).</p>
+                    </div>
+                </div>
+                <!-- Linha 3 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-3" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-3" class="text-sm font-bold text-slate-200 cursor-pointer">Definir Agenda de Gravação de Conteúdos</label>
+                        <p class="text-xs text-slate-400 mt-1">Bloquear um horário diário (exemplo: das 10h às 11h) para captação mútua de conteúdos reais de bastidores e rotinas.</p>
+                    </div>
+                </div>
+                <!-- Linha 4 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-4" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-4" class="text-sm font-bold text-slate-200 cursor-pointer">Configurar Campanha de 10 R$ Diários</label>
+                        <p class="text-xs text-slate-400 mt-1">Criar um anúncio simples através do gestor oficial de anúncios do Meta focado no público da sua região.</p>
+                    </div>
+                </div>
+                <!-- Linha 5 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-5" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-5" class="text-sm font-bold text-slate-200 cursor-pointer">Gravar Prova Social de Entrega</label>
+                        <p class="text-xs text-slate-400 mt-1">Filmar depoimentos genuínos dos clientes no ato da entrega, focando na sua postura profissional e atendimento.</p>
+                    </div>
+                </div>
+                <!-- Linha 6 -->
+                <div class="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800/50 hover:border-slate-700 transition">
+                    <input type="checkbox" id="tarefa-6" onchange="atualizarProgresso()" class="mt-1 w-4 h-4 rounded border-slate-800 text-orange-500 bg-slate-900 focus:ring-orange-500/20 focus:ring-offset-0 no-print">
+                    <div>
+                        <label for="tarefa-6" class="text-sm font-bold text-slate-200 cursor-pointer">Estudar Aulas Gravadas da Plataforma</label>
+                        <p class="text-xs text-slate-400 mt-1">Consumir semanalmente os conteúdos gravados sobre processos e técnicas de fecho para reciclagem contínua.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ALERTA DE NOTIFICAÇÃO (Substituição amigável ao alert padrão - no-print) -->
+        <div id="alerta-copiar" class="fixed bottom-6 right-6 bg-slate-900 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition duration-300 pointer-events-none z-50 no-print">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-xs font-bold" id="alerta-texto">Guião copiado para a área de transferência!</span>
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="border-t border-slate-900 bg-slate-950 mt-12 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 Resumo Turbo - G30 Mentoria Automóvel. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- LÓGICA E INTERATIVIDADE -->
+    <script>
+        // Dados do Quadro de Perguntas (5W2H)
+        const dadosPerguntas = {
+            oque: {
+                titulo: "Atendimento Humanizado & Foco nas Pessoas",
+                subtitulo: "Ação Central",
+                descricao: "Mudar radicalmente o foco do produto físico para o ser humano. O processo assenta em criar ligações emocionais genuínas (perguntar pela família, objetivos, rotinas do cliente) antes de apresentar valores ou tabelas técnicas de veículos.",
+                conselho: "O cliente escolhe primeiro o vendedor, em segundo lugar a empresa e só em terceiro o produto.",
+                prioridade: "Prioridade: Altíssima"
+            },
+            porque: {
+                titulo: "Diferenciação num Mercado Altamente Competitivo",
+                subtitulo: "Justificação Estratégica",
+                descricao: "A grande maioria dos vendedores foca-se exclusivamente na parte técnica e nos números, criando uma barreira de defesa natural no cliente. Gerar ligações quebra a objeção de confiança, que é a maior barreira de fecho.",
+                conselho: "Quem cuida das pessoas não precisa de disputar preços.",
+                prioridade: "Prioridade: Crítica"
+            },
+            quem: {
+                titulo: "O Vendedor como Dono do Próprio Negócio",
+                subtitulo: "Definição de Responsabilidade",
+                descricao: "O vendedor moderno atua com a autonomia de um empresário parceiro. É responsável por alimentar a sua própria carteira de potenciais clientes utilizando a sua presença digital, reduzindo a dependência absoluta dos anúncios pagos pela empresa.",
+                conselho: "A sua secretária e o seu computador são a sua empresa de alto rendimento.",
+                prioridade: "Prioridade: Alta"
+            },
+            onde: {
+                titulo: "Redes Digitais de Atração e Fecho de Negócios na Loja",
+                subtitulo: "Canais Operacionais",
+                descricao: "A captação ocorre de forma orgânica nas redes sociais do próprio vendedor e o acolhimento físico na loja deve espelhar essa mesma segurança e autenticidade. O ambiente virtual e o físico devem respirar a mesma clareza de processos.",
+                conselho: "O seu perfil digital é o seu cartão de visita moderno.",
+                prioridade: "Prioridade: Média-Alta"
+            },
+            quando: {
+                titulo: "Implementação Imediata na Reta Final do Mês",
+                subtitulo: "Cronograma de Trabalho",
+                descricao: "A transição do método de atração e a implementação das rotinas diárias devem iniciar no mesmo dia. O fim do mês é a altura crítica onde a energia extra gera mais conversões em menos tempo de diálogo.",
+                conselho: "Não espere pelo início do mês; comece hoje com as ferramentas disponíveis.",
+                prioridade: "Prioridade: Urgente"
+            },
+            como: {
+                titulo: "Execução Prática Através do Funil Triplo de Conteúdo",
+                subtitulo: "Estratégia Operacional",
+                descricao: "Criação diária de vídeos curtos sem descrição detalhada na legenda para máxima entrega do algoritmo, associada a histórias focadas na rotina ao longo do dia para gerar chamadas diretas por mensagem privada.",
+                conselho: "O feito é muito melhor do que o perfeito que nunca é publicado.",
+                prioridade: "Prioridade: Alta"
+            },
+            quanto: {
+                titulo: "Baixo Investimento e Excelente Gestão de Custos",
+                subtitulo: "Análise de Custos",
+                descricao: "Ações com custo financeiro baixíssimo. Recomenda-se começar com investimentos mínimos em publicidade (cerca de R$ 10,00 por dia) e investir em pequenos brindes personalizados para os aniversariantes locais.",
+                conselho: "Substitua investimentos massivos em portais por publicidade regional focada.",
+                prioridade: "Prioridade: Excelente Retorno"
+            }
+        };
+
+        // Função para Alternar Perguntas no Painel
+        function selecionarPergunta(chave) {
+            // Atualizar classes dos botões
+            const botoes = document.querySelectorAll('#quadro-perguntas button');
+            botoes.forEach(btn => {
+                btn.className = "p-4 rounded-xl text-left border transition duration-300 bg-slate-950 border-slate-800 hover:bg-slate-800";
+                const subtitulo = btn.querySelector('span:first-child');
+                subtitulo.classList.replace('text-orange-400', 'text-slate-400');
+                const titulo = btn.querySelector('span:last-child');
+                titulo.classList.replace('text-slate-100', 'text-slate-200');
+            });
+
+            const btnAtivo = document.getElementById(`btn-${chave}`);
+            btnAtivo.className = "p-4 rounded-xl text-left border transition duration-300 bg-slate-800/50 border-orange-500/50 hover:bg-slate-800";
+            btnAtivo.querySelector('span:first-child').classList.replace('text-slate-400', 'text-orange-400');
+            btnAtivo.querySelector('span:last-child').classList.replace('text-slate-200', 'text-slate-100');
+
+            // Atualizar o conteúdo do detalhe
+            const dados = dadosPerguntas[chave];
+            document.getElementById('conteudo-detalhe').innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="space-y-3 flex-1">
+                        <span class="text-xs font-bold text-orange-500 uppercase tracking-widest">${dados.subtitulo}</span>
+                        <h3 class="text-lg font-bold text-slate-100">${dados.titulo}</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">${dados.descricao}</p>
+                        <div class="pt-2 flex flex-wrap gap-2 no-print">
+                            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-slate-300">Foco Total</span>
+                            <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-slate-300">Metodologia G30</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-80 bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <span class="text-xs font-bold text-slate-400 block uppercase tracking-wider">Conselho de Ouro</span>
+                        <p class="text-xs text-slate-300 italic leading-relaxed">"${dados.conselho}"</p>
+                        <div class="h-px bg-slate-800 no-print"></div>
+                        <span class="text-[11px] text-orange-400 block">★ ${dados.prioridade}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Função de Detalhes do Funil de Atração
+        function mostrarInfoFunil(etapa) {
+            const detalheTopo = document.getElementById('detalhe-topo');
+            const detalheMeio = document.getElementById('detalhe-meio');
+            const detalheFundo = document.getElementById('detalhe-fundo');
+
+            const blocoTopo = document.getElementById('funil-topo');
+            const blocoMeio = document.getElementById('funil-meio');
+            const blocoFundo = document.getElementById('funil-fundo');
+
+            // Esconder todos por defeito (exceto se em modo de impressão)
+            detalheTopo.classList.add('hidden');
+            detalheMeio.classList.add('hidden');
+            detalheFundo.classList.add('hidden');
+
+            blocoTopo.classList.replace('bg-slate-800', 'bg-slate-950');
+            blocoMeio.classList.replace('bg-slate-800', 'bg-slate-950');
+            blocoFundo.classList.replace('bg-slate-800', 'bg-slate-950');
+
+            // Mostrar a etapa selecionada
+            if (etapa === 'topo') {
+                detalheTopo.classList.remove('hidden');
+                blocoTopo.classList.replace('bg-slate-950', 'bg-slate-800');
+            } else if (etapa === 'meio') {
+                detalheMeio.classList.remove('hidden');
+                blocoMeio.classList.replace('bg-slate-950', 'bg-slate-800');
+            } else if (etapa === 'fundo') {
+                detalheFundo.classList.remove('hidden');
+                blocoFundo.classList.replace('bg-slate-950', 'bg-slate-800');
+            }
+        }
+
+        // Lógica de Cálculo de Campanhas e Retorno Financeiro
+        function calcularFinanceiro() {
+            const investDiario = parseFloat(document.getElementById('investimento-diario').value) || 0;
+            const comissao = parseFloat(document.getElementById('comissao-media').value) || 0;
+            const custoContato = parseFloat(document.getElementById('custo-contato').value) || 1;
+            const taxaConv = parseFloat(document.getElementById('taxa-conversao').value) / 100 || 0;
+
+            const totalInvest = investDiario * 30;
+            const totalContatos = Math.round(totalInvest / custoContato);
+            const totalVendas = (totalContatos * taxaConv).toFixed(1);
+            const retornoBruto = Math.round(totalVendas * comissao);
+            const lucroLiquido = retornoBruto - totalInvest;
+
+            // Sincronizar com os campos estáticos para folha impressa
+            document.getElementById('print-investimento-diario').innerText = `R$ ${investDiario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('print-comissao-media').innerText = `R$ ${comissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('print-custo-contato').innerText = `R$ ${custoContato.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('print-taxa-conversao').innerText = `${(taxaConv * 100).toFixed(0)}%`;
+
+            document.getElementById('res-investimento').innerText = `R$ ${totalInvest.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('res-contatos').innerText = totalContatos;
+            document.getElementById('res-vendas').innerText = totalVendas;
+            document.getElementById('res-lucro').innerText = `R$ ${lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Alterar cor de acordo com o resultado do lucro
+            const caixaLucro = document.getElementById('res-lucro');
+            if (lucroLiquido < 0) {
+                caixaLucro.className = "text-xl font-black text-rose-500";
+            } else {
+                caixaLucro.className = "text-xl font-black text-emerald-400";
+            }
+        }
+
+        // Lógica de Seleção de Guiões para Copiar
+        const guioes = {
+            1: {
+                tipo: "Fase 1: O Telefonema Surpresa",
+                objetivo: "Gerar surpresa, gratidão e posicionamento da marca sem tentar vender.",
+                texto: "Olá, [Nome do Cliente], muito bom dia! Daqui fala o [Seu Nome], da [Nome da Loja]. Liguei apenas porque o nosso sistema me alertou que hoje é o seu aniversário! Queria desejar-lhe os meus mais sinceros parabéns em nome de toda a equipa. Que tenha um dia muito feliz! Temos aqui na loja uma pequena lembrança guardada com o seu nome para celebrar este dia. Quando passar por estes lados, venha tomar um café comigo para podermos entregar-lhe o seu presente. Um abraço forte e divirta-se muito hoje!",
+                dica: "Realize esta ação preferencialmente por chamada de voz real. O contacto humano via voz quebra barreiras no mercado atual."
+            },
+            2: {
+                tipo: "Fase 2: A Receção e Entrega do Brinde",
+                objetivo: "Fortalecer a ligação humana presencialmente de forma acolhedora.",
+                texto: "Olá, [Nome do Cliente]! Que bom vê-lo por cá, que excelente visita! Venha por aqui, vamos tomar um café rápido. Conforme lhe tinha prometido, aqui está a sua pequena lembrança [Entregar o brinde, como uma caneca ou acessório útil embalado]. Para nós é uma enorme satisfação tê-lo como parte da nossa história. Fez muita questão de vir?",
+                dica: "Mantenha o foco 100% no cliente e evite abordar assuntos sobre trocas de automóveis ou vendas nesta etapa."
+            },
+            3: {
+                tipo: "Fase 3: O Pedido de Indicações Quentes",
+                objetivo: "Capturar novos contactos interessados aproveitando a forte ligação do momento.",
+                texto: "Diga-me uma coisa, [Nome do Cliente], já que ficou satisfeito com a nossa lembrança e com o atendimento que sempre lhe prestámos: consegue indicar-me duas ou três pessoas da sua confiança (amigos ou familiares) que possam estar a pensar em trocar ou comprar carro em breve? Gostaria muito de lhes prestar este mesmo atendimento personalizado e de confiança que teve connosco, sem pressões.",
+                dica: "As pessoas têm prazer em ajudar quando acabam de receber um agrado ou presente sem segundas intenções iniciais."
+            },
+            4: {
+                tipo: "Fase 4: Ligação para a Indicação Recomendada",
+                objetivo: "Abordar o novo contacto ultrapassando totalmente a barreira da desconfiança.",
+                texto: "Olá, [Nome do Novo Contacto], muito bom dia! O meu nome é [Seu Nome], da [Nome da Loja]. Espero que esteja tudo bem consigo. Estou a ligar-lhe a pedido do seu [grau de parentesco, ex: sobrinho/amigo], o [Nome do Cliente que indicou]. Ele esteve connosco ontem aqui na loja e fez questão de me passar o seu contacto pessoal. Ele insistiu muito para que eu lhe apresentasse o nosso trabalho, pois valoriza imenso a nossa seriedade e queria garantir que, quando precisar de um automóvel, seja atendido com total segurança e confiança. Diz-me, neste momento, está a pensar em mudar de veículo?",
+                dica: "A menção imediata de um nome da inteira confiança do contacto elimina por completo a resistência inicial."
+            }
+        };
+
+        let guiaoSelecionado = 1;
+
+        function selecionarGuiao(numero) {
+            guiaoSelecionado = numero;
+            // Atualizar botões
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`btn-g${i}`);
+                if (i === numero) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-orange-600 text-white shadow-lg shadow-orange-500/20";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition duration-300 bg-slate-950 text-slate-400 border border-slate-800 hover:bg-slate-800";
+                }
+            }
+
+            // Atualizar texto da caixa
+            const dados = guioes[numero];
+            document.getElementById('caixa-guiao').innerHTML = `
+                <div>
+                    <span class="px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold rounded uppercase">${dados.tipo}</span>
+                    <h4 class="text-base font-bold text-slate-100 mt-2">Objetivo: ${dados.objetivo}</h4>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-800 text-sm leading-relaxed text-slate-300 italic" id="texto-para-copiar">
+                    "${dados.texto}"
+                </div>
+                <p class="text-xs text-slate-500"><strong>Dica:</strong> ${dados.dica}</p>
+            `;
+        }
+
+        function copiarTextoGuiao() {
+            const textoElemento = document.getElementById('texto-para-copiar');
+            let texto = textoElemento.innerText;
+            
+            // Remover as aspas iniciais e finais
+            if (texto.startsWith('"') && texto.endsWith('"')) {
+                texto = texto.slice(1, -1);
+            }
+
+            // Fallback obrigatório para copiar no Canvas
+            const textareaAuxiliar = document.createElement('textarea');
+            textareaAuxiliar.value = texto;
+            document.body.appendChild(textareaAuxiliar);
+            textareaAuxiliar.select();
+            document.execCommand('copy');
+            document.body.removeChild(textareaAuxiliar);
+
+            // Exibir Alerta Personalizado
+            const alerta = document.getElementById('alerta-copiar');
+            alerta.classList.replace('translate-y-20', 'translate-y-0');
+            alerta.classList.replace('opacity-0', 'opacity-100');
+
+            setTimeout(() => {
+                alerta.classList.replace('translate-y-0', 'translate-y-20');
+                alerta.classList.replace('opacity-100', 'opacity-0');
+            }, 3000);
+        }
+
+        // Lógica de Atualização da Lista de Tarefas (Progresso)
+        function atualizarProgresso() {
+            const totalTarefas = 6;
+            let concluidas = 0;
+
+            for (let i = 1; i <= totalTarefas; i++) {
+                if (document.getElementById(`tarefa-${i}`).checked) {
+                    concluidas++;
+                }
+            }
+
+            const percentagem = Math.round((concluidas / totalTarefas) * 100);
+            
+            // Atualizar elementos visuais
+            document.getElementById('texto-progresso').innerText = `${percentagem}% Concluído`;
+            document.getElementById('barra-progresso').style.width = `${percentagem}%`;
+        }
+
+        // Inicialização Automática de Lógica
+        window.onload = function() {
+            calcularFinanceiro();
+            mostrarInfoFunil('topo');
+        }
+    </script>
+</body>
+</html>
